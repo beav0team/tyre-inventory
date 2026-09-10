@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tyre Inventory</string>
+    <string name="topbar_subtitle">Stock manager</string>
+
+    <!-- Navigation -->
+    <string name="nav_stock">Stock</string>
+    <string name="nav_invoice">Invoice</string>
+    <string name="nav_tools">Tools</string>
+
+    <!-- Common actions -->
+    <string name="add_tyre">Add tyre</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="add">Add</string>
+    <string name="delete_tyre">Delete</string>
+    <string name="delete_tyre_title">Delete tyre?</string>
+    <string name="delete_tyre_body">%1$s\n%2$s — %3$s will be removed.</string>
+    <string name="scan_desc">Scan barcode</string>
+    <string name="tool_scan">Scan barcode</string>
+    <string name="tool_scan_sub">Scan a tyre barcode to stock it</string>
+    <string name="menu_desc">Menu</string>
+    <string name="clear_search_desc">Clear search</string>
+    <string name="add_one">Add one</string>
+    <string name="remove_one">Remove one</string>
+
+    <!-- Stock -->
+    <string name="search_hint">Search brand, model, size, SKU…</string>
+    <string name="in_stock_label">IN STOCK</string>
+    <plurals name="tyres_ready">
+        <item quantity="one">%d tyre ready to sell</item>
+        <item quantity="other">%d tyres ready to sell</item>
+    </plurals>
+    <string name="stat_types">Types</string>
+    <string name="stat_value">Value</string>
+    <string name="stat_low">Low stock</string>
+    <string name="section_rim">Rim diameter</string>
+    <string name="all_rims">All rims</string>
+    <string name="section_tyre_size">Tyre size</string>
+    <string name="section_brand">Brand</string>
+    <string name="sort_label">Sort</string>
+    <string name="sort_size">Size</string>
+    <string name="sort_brand">Brand</string>
+    <string name="sort_price">Price</string>
+    <string name="sort_quantity">Quantity</string>
+    <string name="empty_no_tyres_title">No tyres yet</string>
+    <string name="empty_no_tyres_body">Your stock lives here. Add your first tyre or scan a barcode to get started.</string>
+    <string name="empty_no_results_title">Nothing found</string>
+    <string name="empty_no_results_body">No tyres match “%1$s”.</string>
+    <string name="clear_search">Clear search</string>
+
+    <!-- Editor -->
+    <string name="editor_title_add">Add tyre</string>
+    <string name="editor_title_edit">Edit tyre</string>
+    <string name="editor_rim_category">Rim diameter (category)</string>
+    <string name="editor_width">Width</string>
+    <string name="editor_profile">Profile</string>
+    <string name="editor_brand">Brand *</string>
+    <string name="editor_model">Model / pattern</string>
+    <string name="editor_season">Season (subcategory)</string>
+    <string name="editor_load_index">Load index</string>
+    <string name="editor_speed_index">Speed index</string>
+    <string name="editor_name">Name (optional, auto-built)</string>
+    <string name="editor_sku">SKU / barcode</string>
+    <string name="editor_quantity">Quantity</string>
+    <string name="editor_low_at">Low at</string>
+    <string name="editor_price">Price</string>
+    <string name="editor_notes">Notes</string>
+
+    <!-- Toasts -->
+    <string name="tyre_added">Tyre added</string>
+    <string name="tyre_updated">Tyre updated</string>
+    <string name="tyre_deleted">Tyre deleted</string>
+    <string name="toast_no_code">No code read</string>
+    <string name="toast_imported">Imported: %1$d new, %2$d updated</string>
+    <string name="toast_nothing_to_export">Nothing to export</string>
+    <string name="toast_backup_saved">Backup saved</string>
+    <string name="toast_backup_failed">Backup failed</string>
+    <string name="toast_restore_ok">Restore complete — reloading</string>
+    <string name="toast_restore_failed">Restore failed</string>
+
+    <!-- Tools -->
+    <string name="tools_header_data">Inventory data</string>
+    <string name="tools_import">Import CSV</string>
+    <string name="tools_import_sub">Load tyres from a CSV file</string>
+    <string name="tools_export">Export CSV</string>
+    <string name="tools_export_sub">Share the current stock as a CSV file</string>
+    <string name="tools_header_backup">Backup &amp; safety</string>
+    <string name="tools_backup">Backup database</string>
+    <string name="tools_backup_sub">Save a copy of the stock data</string>
+    <string name="tools_restore">Restore database</string>
+    <string name="tools_restore_sub">Replace stock from a previous backup</string>
+    <string name="tools_header_language">Language</string>
+    <string name="lang_english">English</string>
+    <string name="lang_french">Français</string>
+    <string name="lang_arabic">العربية</string>
+    <string name="about_version">Tyre Inventory · v1.0</string>
+    <string name="about_line">Stock manager for your tyre shop</string>
+
+    <!-- Invoice -->
+    <string name="invoice_add_items">Add items</string>
+    <string name="invoice_client">Client name (optional)</string>
+    <string name="invoice_phone">Phone (optional)</string>
+    <string name="invoice_no_items_title">No items yet</string>
+    <string name="invoice_no_items_body">Add tyres to this invoice from your stock.</string>
+    <string name="invoice_subtotal">Subtotal</string>
+    <string name="invoice_discount">Discount (%)</string>
+    <string name="invoice_total">Total</string>
+    <string name="invoice_generate">Generate &amp; share invoice</string>
+    <string name="invoice_remove_item">Remove line</string>
+    <string name="invoice_picked">%1$s × %2$d added</string>
+    <string name="invoice_empty">Add at least one item</string>
+    <string name="invoice_generated">Invoice generated — stock updated</string>
+    <string name="invoice_number">Invoice</string>
+    <string name="invoice_date">Date</string>
+    <string name="invoice_client_label">Client</string>
+    <string name="invoice_phone_label">Phone</string>
+    <string name="invoice_thanks">Thank you for your business!</string>
+    <string name="invoice_payment">Payment</string>
+    <string name="invoice_payment_cash">Cash</string>
+    <string name="invoice_filename_prefix">invoice</string>
+    <string name="invoice_share_title">Share invoice</string>
+
+    <!-- Low stock worker -->
+    <string name="notif_channel_name">Low stock alerts</string>
+    <string name="notif_channel_desc">Warns when a tyre is at or below its minimum quantity</string>
+    <string name="notif_title">Low stock alert</string>
+    <plurals name="notif_summary">
+        <item quantity="one">%1$s is low on stock (%2$d left, min %3$d)</item>
+        <item quantity="other">%d tyres are low on stock</item>
+    </plurals>
+    <string-array name="seasons">
+        <item>Summer</item>
+        <item>Winter</item>
+        <item>All-Season</item>
+    </string-array>
+</resources>

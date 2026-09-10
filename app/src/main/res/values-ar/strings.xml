@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مخزون الإطارات</string>
+    <string name="topbar_subtitle">مدير المخزون</string>
+
+    <string name="nav_stock">المخزون</string>
+    <string name="nav_invoice">الفاتورة</string>
+    <string name="nav_tools">أدوات</string>
+
+    <string name="add_tyre">إضافة إطار</string>
+    <string name="cancel">إلغاء</string>
+    <string name="save">حفظ</string>
+    <string name="add">إضافة</string>
+    <string name="delete_tyre">حذف</string>
+    <string name="delete_tyre_title">حذف هذا الإطار؟</string>
+    <string name="delete_tyre_body">%1$s\n%2$s — %3$s سيتم حذفه.</string>
+    <string name="scan_desc">مسح الباركود</string>
+    <string name="tool_scan">مسح الباركود</string>
+    <string name="tool_scan_sub">امسح باركود الإطار لإضافته إلى المخزون</string>
+    <string name="menu_desc">القائمة</string>
+    <string name="clear_search_desc">مسح البحث</string>
+    <string name="add_one">إضافة واحد</string>
+    <string name="remove_one">إنقاص واحد</string>
+
+    <string name="search_hint">ابحث عن الماركة، الموديل، المقاس، الرمز…</string>
+    <string name="in_stock_label">في المخزون</string>
+    <plurals name="tyres_ready">
+        <item quantity="zero">%d إطار جاهز للبيع</item>
+        <item quantity="one">%d إطار جاهز للبيع</item>
+        <item quantity="two">%d إطاران جاهزان للبيع</item>
+        <item quantity="few">%d إطارات جاهزة للبيع</item>
+        <item quantity="many">%d إطارًا جاهزًا للبيع</item>
+        <item quantity="other">%d إطار جاهز للبيع</item>
+    </plurals>
+    <string name="stat_types">الأنواع</string>
+    <string name="stat_value">القيمة</string>
+    <string name="stat_low">مخزون منخفض</string>
+    <string name="section_rim">قطر الجنطة</string>
+    <string name="all_rims">كل الجنوط</string>
+    <string name="section_tyre_size">مقاس الإطار</string>
+    <string name="section_brand">الماركة</string>
+    <string name="sort_label">ترتيب</string>
+    <string name="sort_size">المقاس</string>
+    <string name="sort_brand">الماركة</string>
+    <string name="sort_price">السعر</string>
+    <string name="sort_quantity">الكمية</string>
+    <string name="empty_no_tyres_title">لا توجد إطارات بعد</string>
+    <string name="empty_no_tyres_body">سيظهر مخزونك هنا. أضف أول إطار أو امسح باركودًا للبدء.</string>
+    <string name="empty_no_results_title">لا نتائج</string>
+    <string name="empty_no_results_body">لا توجد إطارات تطابق «%1$s».</string>
+    <string name="clear_search">مسح البحث</string>
+
+    <string name="editor_title_add">إضافة إطار</string>
+    <string name="editor_title_edit">تعديل الإطار</string>
+    <string name="editor_rim_category">قطر الجنطة (الفئة)</string>
+    <string name="editor_width">العرض</string>
+    <string name="editor_profile">الارتفاع</string>
+    <string name="editor_brand">الماركة *</string>
+    <string name="editor_model">الموديل / النقش</string>
+    <string name="editor_season">الفصل (الفئة الفرعية)</string>
+    <string name="editor_load_index">مؤشر الحمولة</string>
+    <string name="editor_speed_index">مؤشر السرعة</string>
+    <string name="editor_name">الاسم (اختياري، يُبنى تلقائيًا)</string>
+    <string name="editor_sku">الرمز / الباركود</string>
+    <string name="editor_quantity">الكمية</string>
+    <string name="editor_low_at">تنبيه عند</string>
+    <string name="editor_price">السعر</string>
+    <string name="editor_notes">ملاحظات</string>
+
+    <string name="tyre_added">تمت إضافة الإطار</string>
+    <string name="tyre_updated">تم تعديل الإطار</string>
+    <string name="tyre_deleted">تم حذف الإطار</string>
+    <string name="toast_no_code">لم يُقرأ أي رمز</string>
+    <string name="toast_imported">تم الاستيراد: %1$d جديد، %2$d محدّث</string>
+    <string name="toast_nothing_to_export">لا شيء للتصدير</string>
+    <string name="toast_backup_saved">تم الحفظ</string>
+    <string name="toast_backup_failed">فشل الحفظ</string>
+    <string name="toast_restore_ok">اكتملت الاستعادة — يتم إعادة التحميل</string>
+    <string name="toast_restore_failed">فشلت الاستعادة</string>
+
+    <string name="tools_header_data">بيانات المخزون</string>
+    <string name="tools_import">استيراد CSV</string>
+    <string name="tools_import_sub">تحميل الإطارات من ملف CSV</string>
+    <string name="tools_export">تصدير CSV</string>
+    <string name="tools_export_sub">مشاركة المخزون الحالي كملف CSV</string>
+    <string name="tools_header_backup">النسخ الاحتياطي والأمان</string>
+    <string name="tools_backup">نسخ احتياطي لقاعدة البيانات</string>
+    <string name="tools_backup_sub">حفظ نسخة من بيانات المخزون</string>
+    <string name="tools_restore">استعادة قاعدة البيانات</string>
+    <string name="tools_restore_sub">استبدال المخزون من نسخة احتياطية</string>
+    <string name="tools_header_language">اللغة</string>
+    <string name="lang_english">English</string>
+    <string name="lang_french">Français</string>
+    <string name="lang_arabic">العربية</string>
+    <string name="about_version">مخزون الإطارات · v1.0</string>
+    <string name="about_line">مدير مخزون لمحلك</string>
+
+    <string name="invoice_add_items">إضافة عناصر</string>
+    <string name="invoice_client">اسم العميل (اختياري)</string>
+    <string name="invoice_phone">الهاتف (اختياري)</string>
+    <string name="invoice_no_items_title">لا عناصر بعد</string>
+    <string name="invoice_no_items_body">أضف إطارات إلى هذه الفاتورة من مخزونك.</string>
+    <string name="invoice_subtotal">المجموع الفرعي</string>
+    <string name="invoice_discount">الخصم (٪)</string>
+    <string name="invoice_total">المجموع</string>
+    <string name="invoice_generate">إنشاء الفاتورة ومشاركتها</string>
+    <string name="invoice_remove_item">حذف العنصر</string>
+    <string name="invoice_picked">%1$s × %2$d تمت الإضافة</string>
+    <string name="invoice_empty">أضف عنصرًا واحدًا على الأقل</string>
+    <string name="invoice_generated">تم إنشاء الفاتورة — تم تحديث المخزون</string>
+    <string name="invoice_number">الفاتورة</string>
+    <string name="invoice_date">التاريخ</string>
+    <string name="invoice_client_label">العميل</string>
+    <string name="invoice_phone_label">الهاتف</string>
+    <string name="invoice_thanks">شكرًا لثقتكم بنا!</string>
+    <string name="invoice_payment">الدفع</string>
+    <string name="invoice_payment_cash">نقدًا</string>
+    <string name="invoice_filename_prefix">فاتورة</string>
+    <string name="invoice_share_title">مشاركة الفاتورة</string>
+
+    <string name="notif_channel_name">تنبيهات المخزون المنخفض</string>
+    <string name="notif_channel_desc">تنبيه عندما يكون الإطار عند أو تحت الحد الأدنى</string>
+    <string name="notif_title">تنبيه المخزون المنخفض</string>
+    <plurals name="notif_summary">
+        <item quantity="zero">لا توجد إطارات منخفضة</item>
+        <item quantity="one">%1$s منخفض (%2$d متبقية، الحد %3$d)</item>
+        <item quantity="two">%1$d إطاران منخفضان</item>
+        <item quantity="few">%1$d إطارات منخفضة</item>
+        <item quantity="many">%1$d إطارًا منخفضًا</item>
+        <item quantity="other">%1$d إطار منخفض</item>
+    </plurals>
+    <string-array name="seasons">
+        <item>الصيف</item>
+        <item>الشتاء</item>
+        <item>لجميع الفصول</item>
+    </string-array>
+</resources>

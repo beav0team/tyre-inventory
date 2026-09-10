@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stock Pneus</string>
+    <string name="topbar_subtitle">Gestion du stock</string>
+
+    <string name="nav_stock">Stock</string>
+    <string name="nav_invoice">Facture</string>
+    <string name="nav_tools">Outils</string>
+
+    <string name="add_tyre">Ajouter un pneu</string>
+    <string name="cancel">Annuler</string>
+    <string name="save">Enregistrer</string>
+    <string name="add">Ajouter</string>
+    <string name="delete_tyre">Supprimer</string>
+    <string name="delete_tyre_title">Supprimer ce pneu ?</string>
+    <string name="delete_tyre_body">%1$s\n%2$s — %3$s sera supprimé.</string>
+    <string name="scan_desc">Scanner le code-barres</string>
+    <string name="tool_scan">Scanner un code-barres</string>
+    <string name="tool_scan_sub">Scanner le code-barres d’un pneu pour le stocker</string>
+    <string name="menu_desc">Menu</string>
+    <string name="clear_search_desc">Effacer la recherche</string>
+    <string name="add_one">Ajouter un</string>
+    <string name="remove_one">Retirer un</string>
+
+    <string name="search_hint">Rechercher marque, modèle, taille, SKU…</string>
+    <string name="in_stock_label">EN STOCK</string>
+    <plurals name="tyres_ready">
+        <item quantity="one">%d pneu prêt à vendre</item>
+        <item quantity="other">%d pneus prêts à vendre</item>
+    </plurals>
+    <string name="stat_types">Modèles</string>
+    <string name="stat_value">Valeur</string>
+    <string name="stat_low">Stock bas</string>
+    <string name="section_rim">Diamètre de la jante</string>
+    <string name="all_rims">Toutes jantes</string>
+    <string name="section_tyre_size">Taille du pneu</string>
+    <string name="section_brand">Marque</string>
+    <string name="sort_label">Trier</string>
+    <string name="sort_size">Taille</string>
+    <string name="sort_brand">Marque</string>
+    <string name="sort_price">Prix</string>
+    <string name="sort_quantity">Quantité</string>
+    <string name="empty_no_tyres_title">Aucun pneu pour l’instant</string>
+    <string name="empty_no_tyres_body">Votre stock apparaîtra ici. Ajoutez un pneu ou scannez un code-barres pour commencer.</string>
+    <string name="empty_no_results_title">Aucun résultat</string>
+    <string name="empty_no_results_body">Aucun pneu ne correspond à «%1$s».</string>
+    <string name="clear_search">Effacer la recherche</string>
+
+    <string name="editor_title_add">Ajouter un pneu</string>
+    <string name="editor_title_edit">Modifier le pneu</string>
+    <string name="editor_rim_category">Diamètre de la jante (catégorie)</string>
+    <string name="editor_width">Largeur</string>
+    <string name="editor_profile">Profil</string>
+    <string name="editor_brand">Marque *</string>
+    <string name="editor_model">Modèle / sculpture</string>
+    <string name="editor_season">Saison (sous-catégorie)</string>
+    <string name="editor_load_index">Indice de charge</string>
+    <string name="editor_speed_index">Indice de vitesse</string>
+    <string name="editor_name">Nom (facultatif, auto-généré)</string>
+    <string name="editor_sku">SKU / code-barres</string>
+    <string name="editor_quantity">Quantité</string>
+    <string name="editor_low_at">Alerte à</string>
+    <string name="editor_price">Prix</string>
+    <string name="editor_notes">Notes</string>
+
+    <string name="tyre_added">Pneu ajouté</string>
+    <string name="tyre_updated">Pneu modifié</string>
+    <string name="tyre_deleted">Pneu supprimé</string>
+    <string name="toast_no_code">Code non lu</string>
+    <string name="toast_imported">Importé : %1$d nouveaux, %2$d mis à jour</string>
+    <string name="toast_nothing_to_export">Rien à exporter</string>
+    <string name="toast_backup_saved">Sauvegarde effectuée</string>
+    <string name="toast_backup_failed">Échec de la sauvegarde</string>
+    <string name="toast_restore_ok">Restauration terminée — rechargement</string>
+    <string name="toast_restore_failed">Échec de la restauration</string>
+
+    <string name="tools_header_data">Données du stock</string>
+    <string name="tools_import">Importer un CSV</string>
+    <string name="tools_import_sub">Charger des pneus depuis un fichier CSV</string>
+    <string name="tools_export">Exporter un CSV</string>
+    <string name="tools_export_sub">Partager le stock actuel en CSV</string>
+    <string name="tools_header_backup">Sauvegarde &amp; sécurité</string>
+    <string name="tools_backup">Sauvegarder la base</string>
+    <string name="tools_backup_sub">Enregistrer une copie des données</string>
+    <string name="tools_restore">Restaurer la base</string>
+    <string name="tools_restore_sub">Remplacer le stock par une sauvegarde</string>
+    <string name="tools_header_language">Langue</string>
+    <string name="lang_english">English</string>
+    <string name="lang_french">Français</string>
+    <string name="lang_arabic">العربية</string>
+    <string name="about_version">Stock Pneus · v1.0</string>
+    <string name="about_line">Gestion du stock de votre boutique</string>
+
+    <string name="invoice_add_items">Ajouter des articles</string>
+    <string name="invoice_client">Nom du client (facultatif)</string>
+    <string name="invoice_phone">Téléphone (facultatif)</string>
+    <string name="invoice_no_items_title">Aucun article</string>
+    <string name="invoice_no_items_body">Ajoutez des pneus à cette facture depuis votre stock.</string>
+    <string name="invoice_subtotal">Sous-total</string>
+    <string name="invoice_discount">Remise (%)</string>
+    <string name="invoice_total">Total</string>
+    <string name="invoice_generate">Générer et partager la facture</string>
+    <string name="invoice_remove_item">Supprimer la ligne</string>
+    <string name="invoice_picked">%1$s × %2$d ajouté</string>
+    <string name="invoice_empty">Ajoutez au moins un article</string>
+    <string name="invoice_generated">Facture générée — stock mis à jour</string>
+    <string name="invoice_number">Facture</string>
+    <string name="invoice_date">Date</string>
+    <string name="invoice_client_label">Client</string>
+    <string name="invoice_phone_label">Téléphone</string>
+    <string name="invoice_thanks">Merci pour votre confiance !</string>
+    <string name="invoice_payment">Paiement</string>
+    <string name="invoice_payment_cash">Espèces</string>
+    <string name="invoice_filename_prefix">facture</string>
+    <string name="invoice_share_title">Partager la facture</string>
+
+    <string name="notif_channel_name">Alertes stock bas</string>
+    <string name="notif_channel_desc">Alarme lorsqu’un pneu est au niveau ou sous son minimum</string>
+    <string name="notif_title">Alerte stock bas</string>
+    <plurals name="notif_summary">
+        <item quantity="one">%1$s est en stock bas (%2$d restants, min %3$d)</item>
+        <item quantity="other">%d pneus sont en stock bas</item>
+    </plurals>
+    <string-array name="seasons">
+        <item>Été</item>
+        <item>Hiver</item>
+        <item>Toutes saisons</item>
+    </string-array>
+</resources>
