@@ -20,6 +20,9 @@ all offline, all in the user's language (English / Français / العربية).
     payment status **Cash / Partial / Credit** with paid amount
   - **TVA 20%** (configurable) applied after discount, DH totals
   - Generates an A4 PDF with your **shop name / address / phone / RC / ICE header** and VAT line, then shares it
+  - **Custom invoice design**: shop logo (top-left), accent color, standard **HT / TVA / TTC** lines,
+    the total **spelled out in French** ("Arrêtée la présente facture à la somme de … dirhams et … centimes"),
+    a red **outstanding-balance** line on partial/credit invoices, and a thank-you footer
   - Completing a sale decrements stock (with a safety clamp) and logs a SALE movement
 - **Sales history**
   - Dashboard: today's revenue & invoice count, this month's revenue and **profit** (from cost price)
@@ -29,11 +32,23 @@ all offline, all in the user's language (English / Français / العربية).
 - **Shop settings**
   - Shop profile (name, address, phone, RC, ICE) — printed on the invoice header
   - TVA rate (default 20%)
+- **Invoice design**
+  - Logo upload (preview + remove), accent color picker, toggles for amount-in-letters, legal strip,
+    HT/TVA/TTC lines, outstanding balance and thank-you footer — applied instantly to new PDFs and reprints
 - **Tools**
   - CSV import / export, database backup / restore, barcode scan
   - In-app language switch EN / FR / AR (persisted, survives restart)
   - **Daily auto-backup** of the database to the app's External Files area (7-day retention)
 - Local Room database (`inventory.db`), no accounts, works fully offline
+
+## Download
+
+Grab the latest APK from the [**Releases**](https://github.com/beav0team/tyre-inventory/releases) page, or install
+straight from a build:
+
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
 
 ## Tech stack
 
@@ -54,6 +69,8 @@ app/src/main/java/com/yassine/inventory/
 ├── App.kt / MainActivity.kt       # locale attachBaseContext, WorkManager scheduling
 ├── AppLocale.kt                   # shared-prefs language helper (EN/FR/AR)
 ├── Invoice.kt / InvoicePdf.kt     # invoice model + A4 PDF renderer
+├── AmountWords.kt                 # French amount-in-letters (dirhams / centimes)
+├── InvoiceDesign.kt               # invoice design prefs (logo, accent, options)
 ├── CsvImporter.kt / CsvExporter.kt
 ├── DbBackup.kt                    # manual backup/restore via SAF
 ├── LowStockWorker.kt / AutoBackupWorker.kt
@@ -62,7 +79,8 @@ app/src/main/java/com/yassine/inventory/
 ├── data/                          # AppDatabase (v4), entities, DAOs, Item
 └── ui/                            # screens (InventoryScreen, InvoicePane,
                                    # SalesHistoryScreen, MovementsScreen,
-                                   # ShopSettingsScreen, ItemEditorDialog)
+                                   # ShopSettingsScreen, InvoiceDesignScreen,
+                                   # ItemEditorDialog)
 ```
 
 ## Building
@@ -82,7 +100,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ## Versioning
 
-See [CHANGELOG.md](CHANGELOG.md). Current version: **1.4.0** (build 4).
+See [CHANGELOG.md](CHANGELOG.md). Current version: **1.5.0** (build 5).
+Pre-built APKs are published on the [Releases](https://github.com/beav0team/tyre-inventory/releases) page.
 
 ## License
 
