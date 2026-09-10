@@ -28,6 +28,8 @@ object CsvImporter {
         val iQty = colIndex("quantity", "qty", "stock", "count")
         val iMin = colIndex("min_quantity", "min", "min_qty", "threshold")
         val iPrice = colIndex("price", "prix")
+        val iCost = colIndex("cost_price", "cost", "costprice", "prix_achat", "prixachat")
+        val iSupplier = colIndex("supplier", "fournisseur", "provider", "vendor")
         val iNotes = colIndex("notes", "remark", "note")
 
         fun cell(row: List<String>, index: Int?): String {
@@ -41,8 +43,8 @@ object CsvImporter {
                 if (name.isBlank()) continue
 
                 val rim = cell(row, iRim).toIntOrNull() ?: extractRimFromName(name)
-                val width = cell(row, iWidth).toIntOrNull() ?: 0
-                val profile = cell(row, iProfile).toIntOrNull() ?: 0
+                val width = cell(row, iWidth).toIntOrNull() ?: extractWidthFromName(name)
+                val profile = cell(row, iProfile).toIntOrNull() ?: extractProfileFromName(name)
                 val subCategory = cell(row, iSub).ifBlank { guessSubCategory(name, width, profile, rim) }
                 val category = cell(row, iCategory).ifBlank {
                     if (rim > 0) "${rim}\"" else ""
@@ -65,6 +67,8 @@ object CsvImporter {
                         quantity = cell(row, iQty).toIntOrNull() ?: 0,
                         minQuantity = cell(row, iMin).toIntOrNull() ?: 0,
                         price = cell(row, iPrice).toDoubleOrNull() ?: 0.0,
+                        costPrice = cell(row, iCost).toDoubleOrNull() ?: 0.0,
+                        supplier = cell(row, iSupplier),
                         notes = cell(row, iNotes),
                     )
                 )
@@ -75,6 +79,18 @@ object CsvImporter {
     private fun extractRimFromName(name: String): Int {
         val raw = name.replace(" ", "")
         val match = Regex("""(\d{2})R(\d{1,2})""").find(raw)
+        return match?.groupValues?.get(2)?.toIntOrNull() ?: 0
+    }
+
+    private fun extractWidthFromName(name: String): Int {
+        val raw = name.replace(" ", "")
+        val match = Regex("""(\d{2,3})/(\d{2})R?""").find(raw)
+        return match?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    }
+
+    private fun extractProfileFromName(name: String): Int {
+        val raw = name.replace(" ", "")
+        val match = Regex("""(\d{2,3})/(\d{2})R?""").find(raw)
         return match?.groupValues?.get(2)?.toIntOrNull() ?: 0
     }
 

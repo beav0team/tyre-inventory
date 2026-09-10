@@ -3,6 +3,7 @@ package com.yassine.inventory.ui
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,13 +25,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,7 +68,9 @@ import androidx.compose.ui.unit.dp
 import com.yassine.inventory.InvoiceLine
 import com.yassine.inventory.InventoryViewModel
 import com.yassine.inventory.R
+import com.yassine.inventory.data.ClientEntity
 import com.yassine.inventory.data.Item
+import com.yassine.inventory.data.PaymentStatus
 import java.util.Locale
 
 @Composable
@@ -76,15 +83,24 @@ fun InvoicePane(
     onPhoneChange: (String) -> Unit,
     discount: String,
     onDiscountChange: (String) -> Unit,
+    paymentStatus: PaymentStatus,
+    onPaymentStatusChange: (PaymentStatus) -> Unit,
+    paidAmount: String,
+    onPaidAmountChange: (String) -> Unit,
+    vatPercent: Double,
     onGenerate: () -> Unit,
 ) {
     val context = LocalContext.current
     val allStock by viewModel.allStock.collectAsState()
+    val clients by viewModel.clients.collectAsState()
     var showPicker by remember { mutableStateOf(false) }
+    var clientMenuOpen by remember { mutableStateOf(false) }
 
     val subtotal = lines.sumOf { it.total }
     val disc = (discount.toDoubleOrNull() ?: 0.0).coerceIn(0.0, 100.0)
-    val total = subtotal * (1.0 - disc / 100.0)
+    val afterDiscount = subtotal * (1.0 - disc / 100.0)
+    val vatAmount = afterDiscount * vatPercent / 100.0
+    val total = afterDiscount + vatAmount
 
     Column(
         modifier = Modifier
@@ -93,15 +109,57 @@ fun InvoicePane(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        OutlinedTextField(
-            value = client,
-            onValueChange = onClientChange,
-            label = { Text(stringResource(R.string.invoice_client)) },
-            singleLine = true,
-            shape = MaterialTheme.shapes.extraLarge,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        // Client picker row
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
-        )
+        ) {
+            OutlinedTextField(
+                value = client,
+                onValueChange = onClientChange,
+                label = { Text(stringResource(R.string.invoice_client)) },
+                singleLine = true,
+                shape = MaterialTheme.shapes.extraLarge,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                modifier = Modifier.weight(1f),
+            )
+            Box {
+                OutlinedButton(
+                    onClick = { clientMenuOpen = true },
+                    shape = MaterialTheme.shapes.extraLarge,
+                ) {
+                    Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+                DropdownMenu(
+                    expanded = clientMenuOpen,
+                    onDismissRequest = { clientMenuOpen = false },
+                ) {
+                    clients.forEach { saved ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    saved.name +
+                                        if (saved.phone.isNotBlank()) "  ·  ${saved.phone}" else "",
+                                )
+                            },
+                            onClick = {
+                                onClientChange(saved.name)
+                                onPhoneChange(saved.phone)
+                                clientMenuOpen = false
+                            },
+                        )
+                    }
+                    if (clients.isEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.invoice_no_clients)) },
+                            onClick = { clientMenuOpen = false },
+                            enabled = false,
+                        )
+                    }
+                }
+            }
+        }
         OutlinedTextField(
             value = phone,
             onValueChange = onPhoneChange,
@@ -111,6 +169,34 @@ fun InvoicePane(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // Payment status
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            paymentOptions.forEach { (status, labelRes) ->
+                FilterChip(
+                    selected = paymentStatus == status,
+                    onClick = { onPaymentStatusChange(status) },
+                    label = { Text(stringResource(labelRes)) },
+                )
+            }
+        }
+        if (paymentStatus != PaymentStatus.CASH) {
+            OutlinedTextField(
+                value = paidAmount,
+                onValueChange = onPaidAmountChange,
+                label = { Text(stringResource(R.string.invoice_paid_amount)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         if (lines.isEmpty()) {
             Box(
@@ -196,6 +282,23 @@ fun InvoicePane(
                     )
                 }
             }
+            if (vatPercent > 0) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        "${stringResource(R.string.invoice_vat)} ($vatPercent%)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        money(vatAmount),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -259,6 +362,12 @@ fun InvoicePane(
         )
     }
 }
+
+private val paymentOptions: List<Pair<PaymentStatus, Int>> = listOf(
+    PaymentStatus.CASH to R.string.invoice_payment_cash,
+    PaymentStatus.PARTIAL to R.string.status_partial,
+    PaymentStatus.CREDIT to R.string.status_credit,
+)
 
 @Composable
 private fun InvoiceLineRow(

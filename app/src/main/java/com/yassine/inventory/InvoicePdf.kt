@@ -58,6 +58,7 @@ object InvoicePdf {
         }.getOrNull()
 
     private fun draw(context: Context, canvas: Canvas, data: InvoiceData) {
+        val shop = ShopSettingsStore.read(context)
         val accent = 0xFFC4540F.toInt()
         val dark = 0xFF211A17.toInt()
         val muted = 0xFF6B5D54.toInt()
@@ -112,7 +113,7 @@ object InvoicePdf {
 
         // Header band
         canvas.drawRect(0f, 40f, PAGE_W.toFloat(), 92f, bandPaint)
-        drawText(canvas, context.getString(R.string.app_name), MARGIN.toFloat(), 52f, titlePaint, 320)
+        drawText(canvas, shop.shopName, MARGIN.toFloat(), 52f, titlePaint, 320)
         drawText(
             canvas,
             "${context.getString(R.string.invoice_number)} ${data.number}",
@@ -123,8 +124,16 @@ object InvoicePdf {
             Layout.Alignment.ALIGN_OPPOSITE,
         )
 
+        // Shop legal strip
+        val shopInfo = listOf(shop.shopAddress, shop.shopPhone, shop.shopRC, shop.shopICE)
+            .filter { it.isNotBlank() }
+            .joinToString("   ·   ")
+        if (shopInfo.isNotBlank()) {
+            drawText(canvas, shopInfo, MARGIN.toFloat(), 100f, labelPaint, contentW)
+        }
+
         // Meta block
-        var y = 112f
+        var y = if (shopInfo.isNotBlank()) 118f else 112f
         val metaCol = 300
         val dateLabel = context.getString(R.string.invoice_date)
         drawText(canvas, dateLabel, MARGIN.toFloat(), y, labelPaint, metaCol)
@@ -232,6 +241,19 @@ object InvoicePdf {
             )
             drawText(
                 canvas, "-" + money(data.discountAmount),
+                totalValueX, y, moneyPaint, 110, Layout.Alignment.ALIGN_OPPOSITE,
+            )
+            y += 18f
+        }
+
+        if (data.vatPercent > 0) {
+            drawText(
+                canvas,
+                "${context.getString(R.string.invoice_vat)} (${"%.2f".format(Locale.US, data.vatPercent)}%):",
+                totalLeft, y, bodyPaint, totalCol - 110, Layout.Alignment.ALIGN_OPPOSITE,
+            )
+            drawText(
+                canvas, money(data.vatAmount),
                 totalValueX, y, moneyPaint, 110, Layout.Alignment.ALIGN_OPPOSITE,
             )
             y += 18f

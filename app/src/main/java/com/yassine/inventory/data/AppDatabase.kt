@@ -7,9 +7,22 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Item::class], version = 3, exportSchema = false)
+@Database(
+    entities = [
+        Item::class,
+        InvoiceEntity::class,
+        InvoiceLineEntity::class,
+        ClientEntity::class,
+        MovementEntity::class,
+    ],
+    version = 4,
+    exportSchema = false,
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
+    abstract fun invoiceDao(): InvoiceDao
+    abstract fun clientDao(): ClientDao
+    abstract fun movementDao(): MovementDao
 
     companion object {
         @Volatile
@@ -29,31 +42,94 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("DROP TABLE IF EXISTS items")
-                db.execSQL(
-                    """CREATE TABLE IF NOT EXISTS items (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        name TEXT NOT NULL DEFAULT '',
-                        sku TEXT NOT NULL DEFAULT '',
-                        rimDiameter INTEGER NOT NULL DEFAULT 0,
-                        width INTEGER NOT NULL DEFAULT 0,
-                        profile INTEGER NOT NULL DEFAULT 0,
-                        brand TEXT NOT NULL DEFAULT '',
-                        model TEXT NOT NULL DEFAULT '',
-                        season TEXT NOT NULL DEFAULT '',
-                        loadIndex TEXT NOT NULL DEFAULT '',
-                        speedIndex TEXT NOT NULL DEFAULT '',
-                        quantity INTEGER NOT NULL DEFAULT 0,
-                        minQuantity INTEGER NOT NULL DEFAULT 0,
-                        price REAL NOT NULL DEFAULT 0.0,
-                        notes TEXT NOT NULL DEFAULT '',
-                        category TEXT NOT NULL DEFAULT '',
-                        subCategory TEXT NOT NULL DEFAULT '',
-                        createdAt INTEGER NOT NULL DEFAULT 0,
-                        updatedAt INTEGER NOT NULL DEFAULT 0
-                    )"""
-                )
+                db.execSQL(CREATE_ITEMS)
             }
         }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                try { db.execSQL("ALTER TABLE items ADD COLUMN costPrice REAL NOT NULL DEFAULT 0.0") } catch (_: Exception) {}
+                try { db.execSQL("ALTER TABLE items ADD COLUMN supplier TEXT NOT NULL DEFAULT ''") } catch (_: Exception) {}
+                try { db.execSQL("ALTER TABLE items ADD COLUMN imagePath TEXT NOT NULL DEFAULT ''") } catch (_: Exception) {}
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS invoices (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        number TEXT NOT NULL,
+                        clientName TEXT NOT NULL DEFAULT '',
+                        clientPhone TEXT NOT NULL DEFAULT '',
+                        subtotal REAL NOT NULL DEFAULT 0.0,
+                        discountPercent INTEGER NOT NULL DEFAULT 0,
+                        vatPercent REAL NOT NULL DEFAULT 0.0,
+                        total REAL NOT NULL DEFAULT 0.0,
+                        paidAmount REAL NOT NULL DEFAULT 0.0,
+                        status TEXT NOT NULL DEFAULT 'CASH',
+                        createdAt INTEGER NOT NULL DEFAULT 0
+                    )"""
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_invoices_number ON invoices(number)"
+                )
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS invoice_lines (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        invoiceId INTEGER NOT NULL,
+                        itemId INTEGER NOT NULL DEFAULT 0,
+                        description TEXT NOT NULL DEFAULT '',
+                        quantity INTEGER NOT NULL DEFAULT 0,
+                        unitPrice REAL NOT NULL DEFAULT 0.0,
+                        unitCost REAL NOT NULL DEFAULT 0.0,
+                        total REAL NOT NULL DEFAULT 0.0
+                    )"""
+                )
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS clients (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        phone TEXT NOT NULL DEFAULT '',
+                        createdAt INTEGER NOT NULL DEFAULT 0
+                    )"""
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_clients_name_phone ON clients(name, phone)")
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS movements (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        itemId INTEGER NOT NULL DEFAULT 0,
+                        itemName TEXT NOT NULL DEFAULT '',
+                        delta INTEGER NOT NULL DEFAULT 0,
+                        type TEXT NOT NULL DEFAULT 'ADJUST',
+                        note TEXT NOT NULL DEFAULT '',
+                        createdAt INTEGER NOT NULL DEFAULT 0
+                    )"""
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_movements_itemId ON movements(itemId)")
+            }
+        }
+
+        private const val CREATE_ITEMS =
+            """CREATE TABLE IF NOT EXISTS items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL DEFAULT '',
+                sku TEXT NOT NULL DEFAULT '',
+                rimDiameter INTEGER NOT NULL DEFAULT 0,
+                width INTEGER NOT NULL DEFAULT 0,
+                profile INTEGER NOT NULL DEFAULT 0,
+                brand TEXT NOT NULL DEFAULT '',
+                model TEXT NOT NULL DEFAULT '',
+                season TEXT NOT NULL DEFAULT '',
+                loadIndex TEXT NOT NULL DEFAULT '',
+                speedIndex TEXT NOT NULL DEFAULT '',
+                quantity INTEGER NOT NULL DEFAULT 0,
+                minQuantity INTEGER NOT NULL DEFAULT 0,
+                price REAL NOT NULL DEFAULT 0.0,
+                costPrice REAL NOT NULL DEFAULT 0.0,
+                supplier TEXT NOT NULL DEFAULT '',
+                imagePath TEXT NOT NULL DEFAULT '',
+                notes TEXT NOT NULL DEFAULT '',
+                category TEXT NOT NULL DEFAULT '',
+                subCategory TEXT NOT NULL DEFAULT '',
+                createdAt INTEGER NOT NULL DEFAULT 0,
+                updatedAt INTEGER NOT NULL DEFAULT 0
+            )"""
 
         fun get(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -62,39 +138,43 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "inventory.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { INSTANCE = it }
             }
         }
 
         suspend fun recreate(instance: AppDatabase) {
-            val db = instance
-            val driver = db.openHelper.writableDatabase
+            val driver = instance.openHelper.writableDatabase
+            driver.execSQL("DROP TABLE IF EXISTS movements")
+            driver.execSQL("DROP TABLE IF EXISTS clients")
+            driver.execSQL("DROP TABLE IF EXISTS invoice_lines")
+            driver.execSQL("DROP TABLE IF EXISTS invoices")
             driver.execSQL("DROP TABLE IF EXISTS items")
-            driver.execSQL(
-                """CREATE TABLE IF NOT EXISTS items (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                    name TEXT NOT NULL DEFAULT '',
-                    sku TEXT NOT NULL DEFAULT '',
-                    rimDiameter INTEGER NOT NULL DEFAULT 0,
-                    width INTEGER NOT NULL DEFAULT 0,
-                    profile INTEGER NOT NULL DEFAULT 0,
-                    brand TEXT NOT NULL DEFAULT '',
-                    model TEXT NOT NULL DEFAULT '',
-                    season TEXT NOT NULL DEFAULT '',
-                    loadIndex TEXT NOT NULL DEFAULT '',
-                    speedIndex TEXT NOT NULL DEFAULT '',
-                    quantity INTEGER NOT NULL DEFAULT 0,
-                    minQuantity INTEGER NOT NULL DEFAULT 0,
-                    price REAL NOT NULL DEFAULT 0.0,
-                    notes TEXT NOT NULL DEFAULT '',
-                    category TEXT NOT NULL DEFAULT '',
-                    subCategory TEXT NOT NULL DEFAULT '',
-                    createdAt INTEGER NOT NULL DEFAULT 0,
-                    updatedAt INTEGER NOT NULL DEFAULT 0
-                )"""
+            driver.execSQL(CREATE_ITEMS)
+            dbExec(
+                driver,
+                "CREATE TABLE IF NOT EXISTS invoices (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, number TEXT NOT NULL, clientName TEXT NOT NULL DEFAULT '', clientPhone TEXT NOT NULL DEFAULT '', subtotal REAL NOT NULL DEFAULT 0.0, discountPercent INTEGER NOT NULL DEFAULT 0, vatPercent REAL NOT NULL DEFAULT 0.0, total REAL NOT NULL DEFAULT 0.0, paidAmount REAL NOT NULL DEFAULT 0.0, status TEXT NOT NULL DEFAULT 'CASH', createdAt INTEGER NOT NULL DEFAULT 0)"
             )
+            dbExec(driver, "CREATE UNIQUE INDEX IF NOT EXISTS index_invoices_number ON invoices(number)")
+            dbExec(
+                driver,
+                "CREATE TABLE IF NOT EXISTS invoice_lines (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, invoiceId INTEGER NOT NULL, itemId INTEGER NOT NULL DEFAULT 0, description TEXT NOT NULL DEFAULT '', quantity INTEGER NOT NULL DEFAULT 0, unitPrice REAL NOT NULL DEFAULT 0.0, unitCost REAL NOT NULL DEFAULT 0.0, total REAL NOT NULL DEFAULT 0.0)"
+            )
+            dbExec(
+                driver,
+                "CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT NOT NULL, phone TEXT NOT NULL DEFAULT '', createdAt INTEGER NOT NULL DEFAULT 0)"
+            )
+            dbExec(driver, "CREATE UNIQUE INDEX IF NOT EXISTS index_clients_name_phone ON clients(name, phone)")
+            dbExec(
+                driver,
+                "CREATE TABLE IF NOT EXISTS movements (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, itemId INTEGER NOT NULL DEFAULT 0, itemName TEXT NOT NULL DEFAULT '', delta INTEGER NOT NULL DEFAULT 0, type TEXT NOT NULL DEFAULT 'ADJUST', note TEXT NOT NULL DEFAULT '', createdAt INTEGER NOT NULL DEFAULT 0)"
+            )
+            dbExec(driver, "CREATE INDEX IF NOT EXISTS index_movements_itemId ON movements(itemId)")
+        }
+
+        private fun dbExec(db: SupportSQLiteDatabase, sql: String) {
+            db.execSQL(sql)
         }
 
         fun closeAndReset() {

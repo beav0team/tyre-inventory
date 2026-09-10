@@ -20,6 +20,9 @@ data class Item(
     val quantity: Int = 0,
     val minQuantity: Int = 0,
     val price: Double = 0.0,
+    val costPrice: Double = 0.0,
+    val supplier: String = "",
+    val imagePath: String = "",
     val notes: String = "",
     val category: String = "",
     val subCategory: String = "",
@@ -66,6 +69,9 @@ data class Item(
 
     val isLowStock: Boolean
         get() = minQuantity > 0 && quantity <= minQuantity
+
+    val hasMargin: Boolean
+        get() = costPrice > 0 && price > costPrice
 
     val saleTitle: String
         get() = buildString {

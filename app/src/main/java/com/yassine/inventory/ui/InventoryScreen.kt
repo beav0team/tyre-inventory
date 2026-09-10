@@ -21,22 +21,26 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -91,12 +95,18 @@ import com.yassine.inventory.InvoiceData
 import com.yassine.inventory.InvoiceLine
 import com.yassine.inventory.InvoiceNumber
 import com.yassine.inventory.InvoicePdf
+import com.yassine.inventory.ShopSettingsStore
 import com.yassine.inventory.data.Item
+import com.yassine.inventory.data.PaymentStatus
 import com.yassine.inventory.SortOption
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.launch
+
+private const val OLD_STOCK_DAYS = 120L
+
+private enum class AppScreen { HOME, SALES, MOVEMENTS, SETTINGS }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,6 +121,9 @@ fun InventoryScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // ---- Routing ----
+    var screen by rememberSaveable { mutableStateOf(AppScreen.HOME) }
+
     // ---- UI state ----
     var activeSection by rememberSaveable { mutableStateOf(Section.STOCK) }
     var query by rememberSaveable { mutableStateOf("") }
@@ -123,33 +136,64 @@ fun InventoryScreen(
     var clientName by rememberSaveable { mutableStateOf("") }
     var phoneNum by rememberSaveable { mutableStateOf("") }
     var discountPct by rememberSaveable { mutableStateOf("") }
+    var paymentStatus by rememberSaveable { mutableStateOf(PaymentStatus.CASH) }
+    var paidAmountStr by rememberSaveable { mutableStateOf("") }
     val invoiceLines = rememberSaveable(saver = invoiceLineListSaver) {
         mutableStateListOf<InvoiceLine>()
     }
 
     val items by viewModel.items.collectAsState()
 
+    val vatPercent = remember { ShopSettingsStore.read(context).vatPercent }
+
     val onGenerateInvoice: () -> Unit = {
         if (invoiceLines.isEmpty()) {
             Toast.makeText(context, context.getString(R.string.invoice_empty), Toast.LENGTH_SHORT).show()
         } else {
+            val discountValue = (discountPct.toDoubleOrNull() ?: 0.0).toInt().coerceIn(0, 100)
+            val number = InvoiceNumber.next(context)
             val data = InvoiceData(
-                number = InvoiceNumber.next(context),
+                number = number,
                 date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
                 client = clientName.trim(),
                 phone = phoneNum.trim(),
                 lines = invoiceLines.toList(),
-                discountPercent = (discountPct.toDoubleOrNull() ?: 0.0).toInt(),
+                discountPercent = discountValue,
+                vatPercent = vatPercent,
             )
+            val linesSnapshot = invoiceLines.toList()
+            viewModel.cacheClient(clientName, phoneNum)
             if (InvoicePdf.createAndShare(context, data)) {
-                viewModel.completeSale(invoiceLines.toList())
-                invoiceLines.clear()
-                clientName = ""
-                phoneNum = ""
-                discountPct = ""
-                Toast.makeText(context, context.getString(R.string.invoice_generated), Toast.LENGTH_LONG).show()
+                viewModel.completeSale(
+                    lines = linesSnapshot,
+                    number = number,
+                    context = context,
+                    vatPercent = vatPercent,
+                    discountPercent = discountValue,
+                    paymentStatus = paymentStatus,
+                    paidAmount = paidAmountStr.toDoubleOrNull() ?: 0.0,
+                    onDone = {
+                        invoiceLines.clear()
+                        clientName = ""
+                        phoneNum = ""
+                        discountPct = ""
+                        paidAmountStr = ""
+                        paymentStatus = PaymentStatus.CASH
+                        Toast.makeText(context, context.getString(R.string.invoice_generated), Toast.LENGTH_LONG).show()
+                    },
+                )
             }
         }
+    }
+
+    if (screen != AppScreen.HOME) {
+        when (screen) {
+            AppScreen.SALES -> SalesHistoryScreen(viewModel = viewModel, onClose = { screen = AppScreen.HOME })
+            AppScreen.MOVEMENTS -> MovementsScreen(viewModel = viewModel, onClose = { screen = AppScreen.HOME })
+            AppScreen.SETTINGS -> ShopSettingsScreen(onClose = { screen = AppScreen.HOME })
+            AppScreen.HOME -> Unit
+        }
+        return
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -266,6 +310,11 @@ fun InventoryScreen(
                             onPhoneChange = { phoneNum = it },
                             discount = discountPct,
                             onDiscountChange = { discountPct = it },
+                            paymentStatus = paymentStatus,
+                            onPaymentStatusChange = { paymentStatus = it },
+                            paidAmount = paidAmountStr,
+                            onPaidAmountChange = { paidAmountStr = it },
+                            vatPercent = vatPercent,
                             onGenerate = onGenerateInvoice,
                         )
 
@@ -275,6 +324,9 @@ fun InventoryScreen(
                             onBackup = onBackup,
                             onRestore = onRestore,
                             onScan = onScan,
+                            onSales = { screen = AppScreen.SALES },
+                            onMovements = { screen = AppScreen.MOVEMENTS },
+                            onSettings = { screen = AppScreen.SETTINGS },
                             onSelectLanguage = { tag ->
                                 AppLocale.set(context.applicationContext, tag)
                                 (context as? Activity)?.recreate()
@@ -314,40 +366,55 @@ fun InventoryScreen(
         )
     }
     deleteTarget?.let { item ->
-        AlertDialog(
-            onDismissRequest = { deleteTarget = null },
-            title = { Text(stringResource(R.string.delete_tyre_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        R.string.delete_tyre_body,
-                        item.saleTitle,
-                        item.sizeSpec,
-                        item.brand,
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    scope.launch {
-                        viewModel.delete(item)
-                        Toast.makeText(context, context.getString(R.string.tyre_deleted), Toast.LENGTH_SHORT).show()
-                        deleteTarget = null
-                    }
-                }) {
-                    Text(
-                        stringResource(R.string.delete_tyre),
-                        color = MaterialTheme.colorScheme.error,
-                    )
+        userDeleteConfirm(
+            item = item,
+            onConfirm = {
+                scope.launch {
+                    viewModel.delete(item)
+                    Toast.makeText(context, context.getString(R.string.tyre_deleted), Toast.LENGTH_SHORT).show()
+                    deleteTarget = null
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { deleteTarget = null }) {
-                    Text(stringResource(R.string.cancel))
-                }
+            onCancel = {
+                deleteTarget = null
             },
         )
     }
+}
+
+@Composable
+private fun userDeleteConfirm(
+    item: Item,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.delete_tyre_title)) },
+        text = {
+            Text(
+                stringResource(
+                    R.string.delete_tyre_body,
+                    item.saleTitle,
+                    item.sizeSpec,
+                    item.brand,
+                )
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    stringResource(R.string.delete_tyre),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
 }
 
 // ---------------------------------------------------------------------------
@@ -595,6 +662,11 @@ private fun ItemRow(
     onDecrease: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val ageDays = remember(item.createdAt) {
+        ((System.currentTimeMillis() - item.createdAt) / 86_400_000L).toInt().coerceAtLeast(0)
+    }
+    val oldStock = ageDays > OLD_STOCK_DAYS
+
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
@@ -613,6 +685,19 @@ private fun ItemRow(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
+                if (oldStock) {
+                    Text(
+                        text = stringResource(R.string.old_stock),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .padding(end = 6.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp),
+                    )
+                }
                 IconButton(
                     onClick = onDelete,
                     modifier = Modifier.size(32.dp),
@@ -630,6 +715,14 @@ private fun ItemRow(
                     text = item.saleSubtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (oldStock) {
+                Text(
+                    text = stringResource(R.string.old_stock_prefix) + " " +
+                        pluralStringResource(R.plurals.stock_days, ageDays, ageDays),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
             Spacer(Modifier.height(8.dp))
@@ -657,6 +750,21 @@ private fun ItemRow(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (item.hasMargin) {
+                        val margin = item.price - item.costPrice
+                        Text(
+                            text = "+${money(margin)}/pneu",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                        )
+                    }
+                    if (item.isLowStock && item.supplier.isNotBlank()) {
+                        Text(
+                            text = item.supplier,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
             }
         }
@@ -721,6 +829,9 @@ private fun ToolsPane(
     onBackup: () -> Unit,
     onRestore: () -> Unit,
     onScan: () -> Unit,
+    onSales: () -> Unit,
+    onMovements: () -> Unit,
+    onSettings: () -> Unit,
     onSelectLanguage: (String) -> Unit,
 ) {
     val toolsContext = LocalContext.current
@@ -744,6 +855,41 @@ private fun ToolsPane(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
+
+        // Business tools
+        Card(
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(Modifier.padding(vertical = 8.dp)) {
+                Text(
+                    text = stringResource(R.string.tools_header_business),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
+                )
+                ToolListItem(
+                    title = stringResource(R.string.tools_sales),
+                    subtitle = stringResource(R.string.tools_sales_sub),
+                    icon = { Icon(Icons.Filled.ReceiptLong, contentDescription = null) },
+                    onClick = onSales,
+                )
+                ToolListItem(
+                    title = stringResource(R.string.tools_movements),
+                    subtitle = stringResource(R.string.tools_movements_sub),
+                    icon = { Icon(Icons.Filled.SwapVert, contentDescription = null) },
+                    onClick = onMovements,
+                )
+                ToolListItem(
+                    title = stringResource(R.string.tools_settings),
+                    subtitle = stringResource(R.string.tools_settings_sub),
+                    icon = { Icon(Icons.Filled.Storefront, contentDescription = null) },
+                    onClick = onSettings,
+                )
+            }
+        }
 
         // Language
         Card(
@@ -856,7 +1002,7 @@ private fun ToolListItem(
         },
         trailingContent = {
             Icon(
-                Icons.Filled.KeyboardArrowRight,
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -883,6 +1029,7 @@ private val invoiceLineListSaver = listSaver<SnapshotStateList<InvoiceLine>, Lis
                 line.item.sizeSpec,
                 line.quantity,
                 line.unitPrice,
+                line.descriptionOverride ?: "",
             )
         }
     },
@@ -905,6 +1052,7 @@ private val invoiceLineListSaver = listSaver<SnapshotStateList<InvoiceLine>, Lis
                         ),
                         quantity = raw[6] as Int,
                         unitPrice = raw[7] as Double,
+                        descriptionOverride = (raw.getOrNull(8) as? String)?.takeIf { it.isNotBlank() },
                     )
                 )
             }

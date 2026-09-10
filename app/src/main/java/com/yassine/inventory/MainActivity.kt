@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        scheduleLowStockChecks()
+        scheduleWorkers()
         setContent {
             InventoryTheme {
                 InventoryRoot()
@@ -59,17 +59,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun scheduleLowStockChecks() {
+    private fun scheduleWorkers() {
         val workManager = WorkManager.getInstance(this)
 
-        val oneTime = OneTimeWorkRequestBuilder<LowStockWorker>().build()
-        workManager.enqueueUniqueWork("low_stock_once", ExistingWorkPolicy.REPLACE, oneTime)
+        val lowOneTime = OneTimeWorkRequestBuilder<LowStockWorker>().build()
+        workManager.enqueueUniqueWork("low_stock_once", ExistingWorkPolicy.REPLACE, lowOneTime)
 
-        val periodic = PeriodicWorkRequestBuilder<LowStockWorker>(1, TimeUnit.DAYS).build()
+        val lowPeriodic = PeriodicWorkRequestBuilder<LowStockWorker>(1, TimeUnit.DAYS).build()
         workManager.enqueueUniquePeriodicWork(
             "low_stock_daily",
             ExistingPeriodicWorkPolicy.KEEP,
-            periodic,
+            lowPeriodic,
+        )
+
+        val backupPeriodic = PeriodicWorkRequestBuilder<AutoBackupWorker>(
+            1, TimeUnit.DAYS
+        ).build()
+        workManager.enqueueUniquePeriodicWork(
+            AutoBackupWorker.NAME,
+            ExistingPeriodicWorkPolicy.UPDATE,
+            backupPeriodic,
         )
     }
 }

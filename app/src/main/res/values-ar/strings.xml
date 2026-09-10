@@ -65,6 +65,13 @@
     <string name="editor_quantity">الكمية</string>
     <string name="editor_low_at">تنبيه عند</string>
     <string name="editor_price">السعر</string>
+    <string name="editor_cost_price">سعر الشراء</string>
+    <string name="editor_supplier">المورد</string>
+    <string name="editor_add_photo">إضافة صورة</string>
+    <string name="editor_remove_photo">إزالة الصورة</string>
+    <string name="editor_camera">الكاميرا</string>
+    <string name="editor_gallery">المعرض</string>
+    <string name="toast_photo_failed">تعذر حفظ الصورة</string>
     <string name="editor_notes">ملاحظات</string>
 
     <string name="tyre_added">تمت إضافة الإطار</string>
@@ -92,7 +99,6 @@
     <string name="lang_english">English</string>
     <string name="lang_french">Français</string>
     <string name="lang_arabic">العربية</string>
-    <string name="about_version">مخزون الإطارات · v1.0</string>
     <string name="about_line">مدير مخزون لمحلك</string>
 
     <string name="invoice_add_items">إضافة عناصر</string>
@@ -104,6 +110,14 @@
     <string name="invoice_discount">الخصم (٪)</string>
     <string name="invoice_total">المجموع</string>
     <string name="invoice_generate">إنشاء الفاتورة ومشاركتها</string>
+    <string name="invoice_payment_status">الدفع</string>
+    <string name="invoice_paid_amount">المبلغ المدفوع</string>
+    <string name="invoice_pick_client">اختيار عميل</string>
+    <string name="invoice_no_clients">لا يوجد عملاء محفوظون بعد</string>
+    <string name="invoice_vat">ضريبة القيمة المضافة</string>
+    <string name="status_paid">مدفوعة</string>
+    <string name="status_partial">جزئي</string>
+    <string name="status_credit">بالدين</string>
     <string name="invoice_remove_item">حذف العنصر</string>
     <string name="invoice_picked">%1$s × %2$d تمت الإضافة</string>
     <string name="invoice_empty">أضف عنصرًا واحدًا على الأقل</string>
@@ -134,4 +148,57 @@
         <item>الشتاء</item>
         <item>لجميع الفصول</item>
     </string-array>
+
+    <!-- أدوات إضافية -->
+    <string name="tools_header_business">المتجر</string>
+    <string name="tools_sales">سجل المبيعات</string>
+    <string name="tools_sales_sub">الفواتير والإيرادات والأرباح</string>
+    <string name="tools_movements">حركات المخزون</string>
+    <string name="tools_movements_sub">سجل دخول/خروج لكل إطار</string>
+    <string name="tools_settings">إعدادات المحل</string>
+    <string name="tools_settings_sub">ملف المحل وRC/ICE وضريبة القيمة المضافة</string>
+
+    <string name="sales_title">سجل المبيعات</string>
+    <string name="sales_today">اليوم</string>
+    <string name="sales_today_revenue">إيرادات اليوم</string>
+    <string name="sales_today_count">فواتير اليوم</string>
+    <string name="sales_month_revenue">هذا الشهر</string>
+    <string name="sales_month_profit">الربح</string>
+    <string name="sales_none">لا مبيعات بعد — أنشئ أول فاتورة.</string>
+    <string name="invoice_lines_label">العناصر</string>
+    <string name="invoice_paid">المدفوع</string>
+    <string name="invoice_due">المتبقي</string>
+    <string name="invoice_reprint">إعادة طباعة PDF</string>
+    <string name="invoice_record_payment">تسجيل الدفع</string>
+    <string name="toast_payment_updated">تم تحديث الدفع</string>
+    <string name="toast_reprint_error">تعذرت إعادة طباعة الفاتورة</string>
+
+    <string name="mov_title">حركات المخزون</string>
+    <string name="mov_all">الكل</string>
+    <string name="mov_sale">مبيعات</string>
+    <string name="mov_restock">توريد</string>
+    <string name="mov_adjust">تسويات</string>
+    <string name="mov_delete">حذف</string>
+    <string name="mov_empty">لا توجد حركات مسجلة بعد.</string>
+
+    <string name="old_stock">قديم</string>
+    <string name="old_stock_prefix">في المخزون منذ</string>
+    <plurals name="stock_days">
+        <item quantity="zero">%d يوم</item>
+        <item quantity="one">%d يوم</item>
+        <item quantity="two">%d يومان</item>
+        <item quantity="few">%d أيام</item>
+        <item quantity="many">%d يومًا</item>
+        <item quantity="other">%d يوم</item>
+    </plurals>
+
+    <string name="settings_title">إعدادات المحل</string>
+    <string name="settings_shop_name">اسم المحل</string>
+    <string name="settings_address">العنوان</string>
+    <string name="settings_phone">الهاتف</string>
+    <string name="settings_rc">رقم السجل التجاري</string>
+    <string name="settings_ice">رقم ICE</string>
+    <string name="settings_vat">ضريبة القيمة المضافة (٪)</string>
+    <string name="settings_saved">تم حفظ الإعدادات</string>
+    <string name="about_version">مخزون الإطارات · v1.4</string>
 </resources>

@@ -94,7 +94,6 @@
     <string name="lang_english">English</string>
     <string name="lang_french">Français</string>
     <string name="lang_arabic">العربية</string>
-    <string name="about_version">Tyre Inventory · v1.0</string>
     <string name="about_line">Stock manager for your tyre shop</string>
 
     <!-- Invoice -->
@@ -134,4 +133,76 @@
         <item>Winter</item>
         <item>All-Season</item>
     </string-array>
+
+    <!-- Editor: costs, supplier, photo -->
+    <string name="editor_cost_price">Cost price</string>
+    <string name="editor_supplier">Supplier</string>
+    <string name="editor_add_photo">Add photo</string>
+    <string name="editor_remove_photo">Remove photo</string>
+    <string name="editor_camera">Camera</string>
+    <string name="editor_gallery">Gallery</string>
+    <string name="toast_photo_failed">Could not save photo</string>
+
+    <!-- Stock ageing & restock -->
+    <string name="old_stock">OLD</string>
+    <string name="old_stock_prefix">In stock</string>
+    <plurals name="stock_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <!-- Tools extra -->
+    <string name="tools_header_business">Business</string>
+    <string name="tools_sales">Sales history</string>
+    <string name="tools_sales_sub">Invoices, revenue and profit</string>
+    <string name="tools_movements">Stock movements</string>
+    <string name="tools_movements_sub">In/out log for every tyre</string>
+    <string name="tools_settings">Shop settings</string>
+    <string name="tools_settings_sub">Shop profile, RC/ICE and VAT</string>
+
+    <!-- Sales history -->
+    <string name="sales_title">Sales history</string>
+    <string name="sales_today">Today</string>
+    <string name="sales_today_revenue">Today’s revenue</string>
+    <string name="sales_today_count">Invoices today</string>
+    <string name="sales_month_revenue">This month</string>
+    <string name="sales_month_profit">Profit</string>
+    <string name="sales_none">No sales yet — create your first invoice.</string>
+    <string name="status_paid">Paid</string>
+    <string name="status_partial">Partial</string>
+    <string name="status_credit">Credit</string>
+    <string name="invoice_lines_label">Items</string>
+    <string name="invoice_paid">Paid</string>
+    <string name="invoice_due">Due</string>
+    <string name="invoice_reprint">Reprint PDF</string>
+    <string name="invoice_record_payment">Record payment</string>
+    <string name="toast_payment_updated">Payment updated</string>
+    <string name="toast_reprint_error">Could not reprint invoice</string>
+
+    <!-- Movements -->
+    <string name="mov_title">Stock movements</string>
+    <string name="mov_all">All</string>
+    <string name="mov_sale">Sales</string>
+    <string name="mov_restock">Restocks</string>
+    <string name="mov_adjust">Adjustments</string>
+    <string name="mov_delete">Deletions</string>
+    <string name="mov_empty">No movements recorded yet.</string>
+
+    <!-- Invoice payment -->
+    <string name="invoice_payment_status">Payment</string>
+    <string name="invoice_paid_amount">Paid amount</string>
+    <string name="invoice_vat">VAT</string>
+    <string name="invoice_pick_client">Pick client</string>
+    <string name="invoice_no_clients">No saved clients yet</string>
+
+    <!-- Shop settings -->
+    <string name="settings_title">Shop settings</string>
+    <string name="settings_shop_name">Shop name</string>
+    <string name="settings_address">Address</string>
+    <string name="settings_phone">Phone</string>
+    <string name="settings_rc">RC number</string>
+    <string name="settings_ice">ICE number</string>
+    <string name="settings_vat">VAT (%)</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="about_version">Tyre Inventory · v1.4</string>
 </resources>

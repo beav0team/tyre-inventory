@@ -61,6 +61,13 @@
     <string name="editor_quantity">Quantité</string>
     <string name="editor_low_at">Alerte à</string>
     <string name="editor_price">Prix</string>
+    <string name="editor_cost_price">Prix d’achat</string>
+    <string name="editor_supplier">Fournisseur</string>
+    <string name="editor_add_photo">Ajouter une photo</string>
+    <string name="editor_remove_photo">Supprimer la photo</string>
+    <string name="editor_camera">Appareil photo</string>
+    <string name="editor_gallery">Galerie</string>
+    <string name="toast_photo_failed">Impossible d’enregistrer la photo</string>
     <string name="editor_notes">Notes</string>
 
     <string name="tyre_added">Pneu ajouté</string>
@@ -88,7 +95,6 @@
     <string name="lang_english">English</string>
     <string name="lang_french">Français</string>
     <string name="lang_arabic">العربية</string>
-    <string name="about_version">Stock Pneus · v1.0</string>
     <string name="about_line">Gestion du stock de votre boutique</string>
 
     <string name="invoice_add_items">Ajouter des articles</string>
@@ -100,6 +106,14 @@
     <string name="invoice_discount">Remise (%)</string>
     <string name="invoice_total">Total</string>
     <string name="invoice_generate">Générer et partager la facture</string>
+    <string name="invoice_payment_status">Paiement</string>
+    <string name="invoice_paid_amount">Montant payé</string>
+    <string name="invoice_pick_client">Choisir un client</string>
+    <string name="invoice_no_clients">Aucun client enregistré</string>
+    <string name="invoice_vat">TVA</string>
+    <string name="status_paid">Payé</string>
+    <string name="status_partial">Partiel</string>
+    <string name="status_credit">À crédit</string>
     <string name="invoice_remove_item">Supprimer la ligne</string>
     <string name="invoice_picked">%1$s × %2$d ajouté</string>
     <string name="invoice_empty">Ajoutez au moins un article</string>
@@ -126,4 +140,53 @@
         <item>Hiver</item>
         <item>Toutes saisons</item>
     </string-array>
+
+    <!-- Outils supplémentaires -->
+    <string name="tools_header_business">Commerce</string>
+    <string name="tools_sales">Historique des ventes</string>
+    <string name="tools_sales_sub">Factures, revenus et profit</string>
+    <string name="tools_movements">Mouvements de stock</string>
+    <string name="tools_movements_sub">Journal d’entrées/sorties pour chaque pneu</string>
+    <string name="tools_settings">Paramètres de la boutique</string>
+    <string name="tools_settings_sub">Profil, RC/ICE et TVA</string>
+
+    <string name="sales_title">Historique des ventes</string>
+    <string name="sales_today">Aujourd’hui</string>
+    <string name="sales_today_revenue">Revenus du jour</string>
+    <string name="sales_today_count">Factures du jour</string>
+    <string name="sales_month_revenue">Ce mois-ci</string>
+    <string name="sales_month_profit">Profit</string>
+    <string name="sales_none">Aucune vente — créez votre première facture.</string>
+    <string name="invoice_lines_label">Articles</string>
+    <string name="invoice_paid">Payé</string>
+    <string name="invoice_due">Restant</string>
+    <string name="invoice_reprint">Réimprimer le PDF</string>
+    <string name="invoice_record_payment">Enregistrer le paiement</string>
+    <string name="toast_payment_updated">Paiement mis à jour</string>
+    <string name="toast_reprint_error">Impossible de réimprimer la facture</string>
+
+    <string name="mov_title">Mouvements de stock</string>
+    <string name="mov_all">Tous</string>
+    <string name="mov_sale">Ventes</string>
+    <string name="mov_restock">Réceptions</string>
+    <string name="mov_adjust">Ajustements</string>
+    <string name="mov_delete">Suppressions</string>
+    <string name="mov_empty">Aucun mouvement enregistré pour l’instant.</string>
+
+    <string name="old_stock">ANCIEN</string>
+    <string name="old_stock_prefix">En stock depuis</string>
+    <plurals name="stock_days">
+        <item quantity="one">%d jour</item>
+        <item quantity="other">%d jours</item>
+    </plurals>
+
+    <string name="settings_title">Paramètres de la boutique</string>
+    <string name="settings_shop_name">Nom de la boutique</string>
+    <string name="settings_address">Adresse</string>
+    <string name="settings_phone">Téléphone</string>
+    <string name="settings_rc">N° RC</string>
+    <string name="settings_ice">N° ICE</string>
+    <string name="settings_vat">TVA (%)</string>
+    <string name="settings_saved">Paramètres enregistrés</string>
+    <string name="about_version">Stock Pneus · v1.4</string>
 </resources>

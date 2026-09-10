@@ -8,8 +8,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.yassine.inventory.data.AppDatabase
+import com.yassine.inventory.data.ClientEntity
+import com.yassine.inventory.data.InvoiceEntity
+import com.yassine.inventory.data.InvoiceLineEntity
 import com.yassine.inventory.data.InventoryRepository
 import com.yassine.inventory.data.Item
+import com.yassine.inventory.data.MovementEntity
+import com.yassine.inventory.data.MovementType
+import com.yassine.inventory.data.PaymentStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +24,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 enum class SortOption(val label: String) {
     SIZE("Size"),
@@ -36,6 +46,13 @@ data class InventoryStats(
         val EMPTY = InventoryStats(0, 0, 0.0, 0)
     }
 }
+
+data class SalesSummary(
+    val todayRevenue: Double,
+    val todayCount: Int,
+    val monthRevenue: Double,
+    val monthProfit: Double,
+)
 
 class InventoryViewModel(private val repository: InventoryRepository) : ViewModel() {
 
@@ -132,6 +149,31 @@ class InventoryViewModel(private val repository: InventoryRepository) : ViewMode
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InventoryStats.EMPTY)
 
+    val invoices: StateFlow<List<InvoiceEntity>> = repository.observeInvoices()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val clients: StateFlow<List<ClientEntity>> = repository.observeClients()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val movements: StateFlow<List<MovementEntity>> = repository.observeMovements()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val salesSummary: StateFlow<SalesSummary> = combine(
+        repository.observeRevenue(startOfDay(), startOfDay() + DAY_MS),
+        repository.observeRevenue(startOfMonth(), startOfMonth() + MONTH_MS),
+        repository.observeProfit(startOfMonth(), startOfMonth() + MONTH_MS),
+        invoices,
+    ) { todayRev, monthRev, monthProfit, all ->
+        SalesSummary(
+            todayRevenue = todayRev,
+            todayCount = all.count {
+                it.createdAt >= startOfDay() && it.createdAt < startOfDay() + DAY_MS
+            },
+            monthRevenue = monthRev,
+            monthProfit = monthProfit,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SalesSummary(0.0, 0, 0.0, 0.0))
+
     fun setQuery(value: String) {
         _query.value = value
     }
@@ -176,11 +218,41 @@ class InventoryViewModel(private val repository: InventoryRepository) : ViewMode
 
     fun adjustQuantity(item: Item, delta: Int) {
         viewModelScope.launch {
+            val oldQty = item.quantity.coerceAtLeast(0)
+            val newQty = (oldQty + delta).coerceAtLeast(0)
+            val applied = newQty - oldQty
             repository.upsert(
                 item.copy(
-                    quantity = (item.quantity + delta).coerceAtLeast(0),
+                    quantity = newQty,
                     updatedAt = System.currentTimeMillis(),
                 )
+            )
+            if (applied != 0) {
+                repository.logMovement(
+                    itemId = item.id,
+                    itemName = item.saleTitle,
+                    delta = applied,
+                    type = if (applied > 0) MovementType.RESTOCK else MovementType.ADJUST,
+                    note = if (applied > 0) item.supplier else "manual",
+                )
+            }
+        }
+    }
+
+    fun restock(item: Item, add: Int) {
+        viewModelScope.launch {
+            repository.upsert(
+                item.copy(
+                    quantity = item.quantity + add,
+                    updatedAt = System.currentTimeMillis(),
+                )
+            )
+            repository.logMovement(
+                itemId = item.id,
+                itemName = item.saleTitle,
+                delta = add,
+                type = MovementType.RESTOCK,
+                note = item.supplier,
             )
         }
     }
@@ -200,17 +272,128 @@ class InventoryViewModel(private val repository: InventoryRepository) : ViewMode
         _scanResult.value = null
     }
 
-    fun completeSale(lines: List<InvoiceLine>) {
+    fun completeSale(
+        lines: List<InvoiceLine>,
+        number: String,
+        context: Context,
+        vatPercent: Double,
+        discountPercent: Int,
+        paymentStatus: PaymentStatus,
+        paidAmount: Double,
+        onDone: (InvoiceEntity) -> Unit,
+    ) {
         viewModelScope.launch {
-            lines.forEach { line ->
-                val current = repository.getById(line.item.id) ?: return@forEach
-                repository.upsert(
-                    current.copy(
-                        quantity = (current.quantity - line.quantity).coerceAtLeast(0),
-                        updatedAt = System.currentTimeMillis(),
-                    )
-                )
+            val subtotal = lines.sumOf { it.total }
+            val discountAmount = subtotal * discountPercent / 100.0
+            val afterDiscount = subtotal - discountAmount
+            val vatAmount = afterDiscount * vatPercent / 100.0
+            val total = afterDiscount + vatAmount
+            val settled = if (paymentStatus == PaymentStatus.CASH) total else paidAmount.coerceIn(0.0, total)
+            val normalizedStatus = when {
+                paymentStatus == PaymentStatus.CASH -> PaymentStatus.CASH
+                settled <= 0 -> PaymentStatus.CREDIT
+                settled >= total -> PaymentStatus.CASH
+                else -> PaymentStatus.PARTIAL
             }
+
+            val invoice = InvoiceEntity(
+                number = number,
+                clientName = _clientNameCache,
+                clientPhone = _clientPhoneCache,
+                subtotal = subtotal,
+                discountPercent = discountPercent,
+                vatPercent = vatPercent,
+                total = total,
+                paidAmount = settled,
+                status = normalizedStatus,
+            )
+            val invoiceId = repository.saveInvoice(
+                invoice,
+                lines.map { line ->
+                    InvoiceLineEntity(
+                        itemId = line.item.id,
+                        description = line.description,
+                        quantity = line.quantity,
+                        unitPrice = line.unitPrice,
+                        unitCost = line.item.costPrice,
+                        total = line.total,
+                    )
+                }
+            )
+            repository.upsertClient(invoice.clientName, invoice.clientPhone)
+
+            lines.forEach { line ->
+                val current = repository.getById(line.item.id)
+                if (current != null) {
+                    val newQty = (current.quantity - line.quantity).coerceAtLeast(0)
+                    repository.upsert(
+                        current.copy(
+                            quantity = newQty,
+                            updatedAt = System.currentTimeMillis(),
+                        )
+                    )
+                    repository.logMovement(
+                        itemId = current.id,
+                        itemName = current.saleTitle,
+                        delta = -line.quantity,
+                        type = MovementType.SALE,
+                        note = invoice.number,
+                    )
+                }
+            }
+            onDone(invoice.copy(id = invoiceId))
+        }
+    }
+
+    private var _clientNameCache: String = ""
+    private var _clientPhoneCache: String = ""
+
+    fun cacheClient(name: String, phone: String) {
+        _clientNameCache = name.trim()
+        _clientPhoneCache = phone.trim()
+    }
+
+    fun updatePayment(invoice: InvoiceEntity, paid: Double) {
+        viewModelScope.launch {
+            val settled = paid.coerceIn(0.0, invoice.total)
+            val status = when {
+                settled <= 0 -> PaymentStatus.CREDIT
+                settled >= invoice.total -> PaymentStatus.CASH
+                else -> PaymentStatus.PARTIAL
+            }
+            repository.updateInvoicePayment(invoice.id, settled, status)
+        }
+    }
+
+    fun reprintInvoice(
+        invoiceId: Long,
+        context: Context,
+        vatPercent: Double,
+        onDone: (Boolean) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val invoice = repository.getInvoice(invoiceId) ?: run { onDone(false); return@launch }
+            val lines = repository.getInvoiceLines(invoiceId)
+            val dateText = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(
+                Date(invoice.createdAt)
+            )
+            val data = InvoiceData(
+                number = invoice.number,
+                date = dateText,
+                client = invoice.clientName,
+                phone = invoice.clientPhone,
+                lines = lines.map { line ->
+                    InvoiceLine(
+                        item = Item(name = line.description),
+                        quantity = line.quantity,
+                        unitPrice = line.unitPrice,
+                        descriptionOverride = line.description,
+                    )
+                },
+                discountPercent = invoice.discountPercent,
+                vatPercent = invoice.vatPercent.takeIf { it > 0 } ?: vatPercent,
+            )
+            onDone(InvoicePdf.createAndShare(context, data))
         }
     }
 
@@ -253,10 +436,35 @@ class InventoryViewModel(private val repository: InventoryRepository) : ViewMode
     }
 
     companion object {
+        private const val DAY_MS = 24L * 60 * 60 * 1000
+        private const val MONTH_MS = 31L * DAY_MS
+
+        private fun startOfDay(): Long = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        private fun startOfMonth(): Long = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
         fun factory(context: Context): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val database = AppDatabase.get(context)
-                InventoryViewModel(InventoryRepository(database.itemDao()))
+                InventoryViewModel(
+                    InventoryRepository(
+                        database.itemDao(),
+                        database.invoiceDao(),
+                        database.clientDao(),
+                        database.movementDao(),
+                    )
+                )
             }
         }
     }

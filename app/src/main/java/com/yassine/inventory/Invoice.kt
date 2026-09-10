@@ -10,11 +10,12 @@ data class InvoiceLine(
     val item: Item,
     val quantity: Int,
     val unitPrice: Double,
+    val descriptionOverride: String? = null,
 ) {
     val total: Double get() = quantity * unitPrice
 
     val description: String
-        get() = buildString {
+        get() = descriptionOverride ?: buildString {
             if (item.brand.isNotBlank()) append(item.brand)
             if (item.model.isNotBlank()) {
                 if (isNotEmpty()) append(" ")
@@ -41,10 +42,13 @@ data class InvoiceData(
     val phone: String,
     val lines: List<InvoiceLine>,
     val discountPercent: Int,
+    val vatPercent: Double = 0.0,
 ) {
     val subtotal: Double get() = lines.sumOf { it.total }
     val discountAmount: Double get() = subtotal * discountPercent / 100.0
-    val total: Double get() = subtotal - discountAmount
+    val afterDiscount: Double get() = subtotal - discountAmount
+    val vatAmount: Double get() = afterDiscount * vatPercent / 100.0
+    val total: Double get() = afterDiscount + vatAmount
 }
 
 object InvoiceNumber {
