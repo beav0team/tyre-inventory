@@ -109,6 +109,8 @@
     <string name="invoice_subtotal">المجموع الفرعي</string>
     <string name="invoice_discount">الخصم (٪)</string>
     <string name="invoice_total">المجموع</string>
+    <string name="invoice_total_ht">المجموع قبل الضريبة</string>
+    <string name="invoice_total_ttc">المجموع الإجمالي</string>
     <string name="invoice_generate">إنشاء الفاتورة ومشاركتها</string>
     <string name="invoice_payment_status">الدفع</string>
     <string name="invoice_paid_amount">المبلغ المدفوع</string>
@@ -157,6 +159,19 @@
     <string name="tools_movements_sub">سجل دخول/خروج لكل إطار</string>
     <string name="tools_settings">إعدادات المحل</string>
     <string name="tools_settings_sub">ملف المحل وRC/ICE وضريبة القيمة المضافة</string>
+    <string name="tools_invoice_design">تصميم الفاتورة</string>
+    <string name="tools_invoice_design_sub">الشعار والألوان والخيارات</string>
+    <string name="design_logo">الشعار</string>
+    <string name="design_choose_logo">اختيار شعار</string>
+    <string name="design_remove_logo">حذف الشعار</string>
+    <string name="design_logo_failed">تعذر تحميل هذه الصورة</string>
+    <string name="design_accent">لون التمييز</string>
+    <string name="design_options">خيارات الفاتورة</string>
+    <string name="design_opt_words">المبلغ بالحروف</string>
+    <string name="design_opt_legal">إظهار المعطيات القانونية (RC/ICE)</string>
+    <string name="design_opt_ht">أسطر HT / TVA / TTC</string>
+    <string name="design_opt_payment">إظهار المبلغ المتبقي في الفاتورة</string>
+    <string name="design_opt_footer">سطر الشكر</string>
 
     <string name="sales_title">سجل المبيعات</string>
     <string name="sales_today">اليوم</string>

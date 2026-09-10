@@ -392,6 +392,8 @@ class InventoryViewModel(private val repository: InventoryRepository) : ViewMode
                 },
                 discountPercent = invoice.discountPercent,
                 vatPercent = invoice.vatPercent.takeIf { it > 0 } ?: vatPercent,
+                paymentStatus = invoice.status,
+                paidAmount = invoice.paidAmount,
             )
             onDone(InvoicePdf.createAndShare(context, data))
         }

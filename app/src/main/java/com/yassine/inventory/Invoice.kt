@@ -2,6 +2,7 @@ package com.yassine.inventory
 
 import android.content.Context
 import com.yassine.inventory.data.Item
+import com.yassine.inventory.data.PaymentStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -43,12 +44,15 @@ data class InvoiceData(
     val lines: List<InvoiceLine>,
     val discountPercent: Int,
     val vatPercent: Double = 0.0,
+    val paymentStatus: PaymentStatus = PaymentStatus.CASH,
+    val paidAmount: Double = 0.0,
 ) {
     val subtotal: Double get() = lines.sumOf { it.total }
     val discountAmount: Double get() = subtotal * discountPercent / 100.0
     val afterDiscount: Double get() = subtotal - discountAmount
     val vatAmount: Double get() = afterDiscount * vatPercent / 100.0
     val total: Double get() = afterDiscount + vatAmount
+    val dueAmount: Double get() = (total - paidAmount).coerceAtLeast(0.0)
 }
 
 object InvoiceNumber {

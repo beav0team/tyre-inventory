@@ -2,6 +2,19 @@
 
 All notable changes to **Tyre Inventory** are documented here.
 
+## [1.5.0] - 2026-09-11
+
+### Added
+- **Invoice design screen** — customize the look of the generated PDF:
+  - Upload a shop **logo** (shown top-left with the shop name beside it), preview, and remove.
+  - **Accent color** picker — the header band, table header and title follow the chosen color.
+  - **Amount in letters (French)** — "Arrêtée la présente facture à la somme de : … dirhams et …
+    centimes" printed on every invoice.
+  - **HT / TVA / TTC** breakdown lines (standard Moroccan tax presentation), toggled on/off.
+  - **Outstanding balance** line in red on the PDF when the invoice is partial or credit.
+  - Toggles for the legal strip (RC/ICE), and the thank-you footer.
+- All options saved instantly; reprints of old invoices use the current design.
+
 ## [1.4.0] - 2026-09-10
 
 ### Added

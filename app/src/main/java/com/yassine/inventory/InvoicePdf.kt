@@ -3,9 +3,12 @@ package com.yassine.inventory
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.text.Layout
@@ -14,8 +17,10 @@ import android.text.TextDirectionHeuristics
 import android.text.TextPaint
 import android.text.TextUtils
 import androidx.core.content.FileProvider
+import com.yassine.inventory.data.PaymentStatus
 import java.io.File
 import java.util.Locale
+import kotlin.math.min
 
 object InvoicePdf {
     private const val PAGE_W = 595
@@ -59,11 +64,13 @@ object InvoicePdf {
 
     private fun draw(context: Context, canvas: Canvas, data: InvoiceData) {
         val shop = ShopSettingsStore.read(context)
-        val accent = 0xFFC4540F.toInt()
+        val design = InvoiceDesignStore.read(context)
+        val accent = design.accentColor.toInt()
         val dark = 0xFF211A17.toInt()
         val muted = 0xFF6B5D54.toInt()
         val rowFill = 0xFFF7EFE9.toInt()
         val hairline = 0xFFE3D6CB.toInt()
+        val dueRed = 0xFFC62828.toInt()
 
         val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
@@ -82,6 +89,11 @@ object InvoicePdf {
         val bodyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = dark
             textSize = 10.5f
+        }
+        val wordsPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = dark
+            textSize = 9.5f
+            typeface = Typeface.DEFAULT_BOLD
         }
         val thPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
@@ -102,6 +114,11 @@ object InvoicePdf {
             textSize = 12f
             typeface = Typeface.DEFAULT_BOLD
         }
+        val duePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = dueRed
+            textSize = 11.5f
+            typeface = Typeface.DEFAULT_BOLD
+        }
         val bandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = accent }
         val rowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = rowFill }
         val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -111,9 +128,27 @@ object InvoicePdf {
 
         val contentW = PAGE_W - 2 * MARGIN
 
-        // Header band
-        canvas.drawRect(0f, 40f, PAGE_W.toFloat(), 92f, bandPaint)
-        drawText(canvas, shop.shopName, MARGIN.toFloat(), 52f, titlePaint, 320)
+        // Header band with logo
+        val bandTop = 40f
+        val bandBottom = 92f
+        canvas.drawRect(0f, bandTop, PAGE_W.toFloat(), bandBottom, bandPaint)
+
+        var titleX = MARGIN.toFloat()
+        val logo = loadLogo(context, design)
+        if (logo != null) {
+            val box = 44f
+            val scale = min(box / logo.height, box / logo.width)
+            val w = logo.width * scale
+            val h = logo.height * scale
+            val logoY = (bandTop + bandBottom) / 2f - h / 2f
+            canvas.drawBitmap(
+                logo, null,
+                RectF(MARGIN.toFloat(), logoY, MARGIN + w, logoY + h), null,
+            )
+            titleX = MARGIN + w + 14f
+        }
+        val titleWidth = (PAGE_W - MARGIN).toInt() - titleX.toInt() - 220
+        drawText(canvas, shop.shopName, titleX, 52f, titlePaint, titleWidth)
         drawText(
             canvas,
             "${context.getString(R.string.invoice_number)} ${data.number}",
@@ -125,9 +160,13 @@ object InvoicePdf {
         )
 
         // Shop legal strip
-        val shopInfo = listOf(shop.shopAddress, shop.shopPhone, shop.shopRC, shop.shopICE)
-            .filter { it.isNotBlank() }
-            .joinToString("   ·   ")
+        val shopInfo = if (design.showLegalStrip) {
+            listOf(shop.shopAddress, shop.shopPhone, shop.shopRC, shop.shopICE)
+                .filter { it.isNotBlank() }
+                .joinToString("   ·   ")
+        } else {
+            ""
+        }
         if (shopInfo.isNotBlank()) {
             drawText(canvas, shopInfo, MARGIN.toFloat(), 100f, labelPaint, contentW)
         }
@@ -223,12 +262,19 @@ object InvoicePdf {
         val totalCol = 220
         val totalLeft = (PAGE_W - MARGIN - totalCol).toFloat()
         val totalValueX = (PAGE_W - MARGIN - 110).toFloat()
+        val breakdown = design.showVatBreakdown
+
+        val subtotalLabel = if (breakdown) {
+            context.getString(R.string.invoice_total_ht)
+        } else {
+            context.getString(R.string.invoice_subtotal)
+        }
         drawText(
-            canvas, "${context.getString(R.string.invoice_subtotal)}:",
+            canvas, "$subtotalLabel:",
             totalLeft, y, bodyPaint, totalCol - 110, Layout.Alignment.ALIGN_OPPOSITE,
         )
         drawText(
-            canvas, money(data.subtotal),
+            canvas, if (breakdown) money(data.afterDiscount) else money(data.subtotal),
             totalValueX, y, moneyPaint, 110, Layout.Alignment.ALIGN_OPPOSITE,
         )
         y += 18f
@@ -261,8 +307,13 @@ object InvoicePdf {
 
         canvas.drawLine(totalLeft, y, (PAGE_W - MARGIN).toFloat(), y, linePaint)
         y += 10f
+        val totalLabel = if (breakdown) {
+            context.getString(R.string.invoice_total_ttc)
+        } else {
+            context.getString(R.string.invoice_total)
+        }
         drawText(
-            canvas, "${context.getString(R.string.invoice_total)}:",
+            canvas, "$totalLabel:",
             totalLeft, y, totalPaint, totalCol - 110, Layout.Alignment.ALIGN_OPPOSITE,
         )
         drawText(
@@ -270,18 +321,54 @@ object InvoicePdf {
             totalValueX, y, totalPaint, 110, Layout.Alignment.ALIGN_OPPOSITE,
         )
 
+        // Outstanding balance
+        if (design.showPaymentStatus && data.paymentStatus != PaymentStatus.CASH) {
+            y += 22f
+            drawText(
+                canvas, "${context.getString(R.string.invoice_due)}:",
+                totalLeft, y, duePaint, totalCol - 110, Layout.Alignment.ALIGN_OPPOSITE,
+            )
+            drawText(
+                canvas, money(data.dueAmount),
+                totalValueX, y, duePaint, 110, Layout.Alignment.ALIGN_OPPOSITE,
+            )
+        }
+
+        // Amount in letters
+        if (design.showAmountWords) {
+            y += 26f
+            drawText(
+                canvas, AmountWords.sentence(data.total),
+                MARGIN.toFloat(), y.coerceAtMost(PAGE_H - 120f), wordsPaint, contentW, maxLines = 3,
+            )
+        }
+
         // Footer
-        val footer = "${context.getString(R.string.invoice_payment)}: ${context.getString(R.string.invoice_payment_cash)}"
+        val paymentLabel = when (data.paymentStatus) {
+            PaymentStatus.CASH -> context.getString(R.string.invoice_payment_cash)
+            PaymentStatus.PARTIAL -> context.getString(R.string.status_partial)
+            PaymentStatus.CREDIT -> context.getString(R.string.status_credit)
+        }
+        val footer = "${context.getString(R.string.invoice_payment)}: $paymentLabel"
         drawText(
             canvas, footer,
             MARGIN.toFloat(), PAGE_H - 44f, labelPaint, contentW,
             Layout.Alignment.ALIGN_CENTER,
         )
-        drawText(
-            canvas, context.getString(R.string.invoice_thanks),
-            MARGIN.toFloat(), PAGE_H - 26f, bodyPaint, contentW,
-            Layout.Alignment.ALIGN_CENTER,
-        )
+        if (design.showFooter) {
+            drawText(
+                canvas, context.getString(R.string.invoice_thanks),
+                MARGIN.toFloat(), PAGE_H - 26f, bodyPaint, contentW,
+                Layout.Alignment.ALIGN_CENTER,
+            )
+        }
+    }
+
+    private fun loadLogo(context: Context, design: InvoiceDesign): Bitmap? {
+        if (!design.logoEnabled) return null
+        val file = InvoiceDesignStore.logoFile(context)
+        if (!file.exists()) return null
+        return BitmapFactory.decodeFile(file.path)
     }
 
     private fun drawText(

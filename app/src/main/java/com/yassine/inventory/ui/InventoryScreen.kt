@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Remove
@@ -106,7 +107,7 @@ import kotlinx.coroutines.launch
 
 private const val OLD_STOCK_DAYS = 120L
 
-private enum class AppScreen { HOME, SALES, MOVEMENTS, SETTINGS }
+private enum class AppScreen { HOME, SALES, MOVEMENTS, SETTINGS, DESIGN }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -160,6 +161,8 @@ fun InventoryScreen(
                 lines = invoiceLines.toList(),
                 discountPercent = discountValue,
                 vatPercent = vatPercent,
+                paymentStatus = paymentStatus,
+                paidAmount = paidAmountStr.toDoubleOrNull() ?: 0.0,
             )
             val linesSnapshot = invoiceLines.toList()
             viewModel.cacheClient(clientName, phoneNum)
@@ -191,6 +194,7 @@ fun InventoryScreen(
             AppScreen.SALES -> SalesHistoryScreen(viewModel = viewModel, onClose = { screen = AppScreen.HOME })
             AppScreen.MOVEMENTS -> MovementsScreen(viewModel = viewModel, onClose = { screen = AppScreen.HOME })
             AppScreen.SETTINGS -> ShopSettingsScreen(onClose = { screen = AppScreen.HOME })
+            AppScreen.DESIGN -> InvoiceDesignScreen(onClose = { screen = AppScreen.HOME })
             AppScreen.HOME -> Unit
         }
         return
@@ -327,6 +331,7 @@ fun InventoryScreen(
                             onSales = { screen = AppScreen.SALES },
                             onMovements = { screen = AppScreen.MOVEMENTS },
                             onSettings = { screen = AppScreen.SETTINGS },
+                            onDesign = { screen = AppScreen.DESIGN },
                             onSelectLanguage = { tag ->
                                 AppLocale.set(context.applicationContext, tag)
                                 (context as? Activity)?.recreate()
@@ -832,6 +837,7 @@ private fun ToolsPane(
     onSales: () -> Unit,
     onMovements: () -> Unit,
     onSettings: () -> Unit,
+    onDesign: () -> Unit,
     onSelectLanguage: (String) -> Unit,
 ) {
     val toolsContext = LocalContext.current
@@ -887,6 +893,12 @@ private fun ToolsPane(
                     subtitle = stringResource(R.string.tools_settings_sub),
                     icon = { Icon(Icons.Filled.Storefront, contentDescription = null) },
                     onClick = onSettings,
+                )
+                ToolListItem(
+                    title = stringResource(R.string.tools_invoice_design),
+                    subtitle = stringResource(R.string.tools_invoice_design_sub),
+                    icon = { Icon(Icons.Filled.Palette, contentDescription = null) },
+                    onClick = onDesign,
                 )
             }
         }

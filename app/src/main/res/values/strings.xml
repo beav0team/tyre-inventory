@@ -105,6 +105,8 @@
     <string name="invoice_subtotal">Subtotal</string>
     <string name="invoice_discount">Discount (%)</string>
     <string name="invoice_total">Total</string>
+    <string name="invoice_total_ht">Total HT</string>
+    <string name="invoice_total_ttc">Total TTC</string>
     <string name="invoice_generate">Generate &amp; share invoice</string>
     <string name="invoice_remove_item">Remove line</string>
     <string name="invoice_picked">%1$s × %2$d added</string>
@@ -159,6 +161,19 @@
     <string name="tools_movements_sub">In/out log for every tyre</string>
     <string name="tools_settings">Shop settings</string>
     <string name="tools_settings_sub">Shop profile, RC/ICE and VAT</string>
+    <string name="tools_invoice_design">Invoice design</string>
+    <string name="tools_invoice_design_sub">Logo, colors and options</string>
+    <string name="design_logo">Logo</string>
+    <string name="design_choose_logo">Choose logo</string>
+    <string name="design_remove_logo">Remove logo</string>
+    <string name="design_logo_failed">Could not load that image</string>
+    <string name="design_accent">Accent color</string>
+    <string name="design_options">Invoice options</string>
+    <string name="design_opt_words">Amount in letters</string>
+    <string name="design_opt_legal">Show shop legal strip (RC/ICE)</string>
+    <string name="design_opt_ht">Show HT / TVA / TTC lines</string>
+    <string name="design_opt_payment">Show outstanding balance</string>
+    <string name="design_opt_footer">Show thank-you footer</string>
 
     <!-- Sales history -->
     <string name="sales_title">Sales history</string>

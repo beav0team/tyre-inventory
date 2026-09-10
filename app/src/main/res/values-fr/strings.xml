@@ -105,6 +105,8 @@
     <string name="invoice_subtotal">Sous-total</string>
     <string name="invoice_discount">Remise (%)</string>
     <string name="invoice_total">Total</string>
+    <string name="invoice_total_ht">Total HT</string>
+    <string name="invoice_total_ttc">Total TTC</string>
     <string name="invoice_generate">Générer et partager la facture</string>
     <string name="invoice_payment_status">Paiement</string>
     <string name="invoice_paid_amount">Montant payé</string>
@@ -149,6 +151,19 @@
     <string name="tools_movements_sub">Journal d’entrées/sorties pour chaque pneu</string>
     <string name="tools_settings">Paramètres de la boutique</string>
     <string name="tools_settings_sub">Profil, RC/ICE et TVA</string>
+    <string name="tools_invoice_design">Design de la facture</string>
+    <string name="tools_invoice_design_sub">Logo, couleurs et options</string>
+    <string name="design_logo">Logo</string>
+    <string name="design_choose_logo">Choisir un logo</string>
+    <string name="design_remove_logo">Supprimer le logo</string>
+    <string name="design_logo_failed">Impossible de charger cette image</string>
+    <string name="design_accent">Couleur d’accent</string>
+    <string name="design_options">Options de la facture</string>
+    <string name="design_opt_words">Montant en toutes lettres</string>
+    <string name="design_opt_legal">Afficher les mentions légales (RC/ICE)</string>
+    <string name="design_opt_ht">Lignes HT / TVA / TTC</string>
+    <string name="design_opt_payment">Afficher le restant à payer</string>
+    <string name="design_opt_footer">Ligne de remerciement</string>
 
     <string name="sales_title">Historique des ventes</string>
     <string name="sales_today">Aujourd’hui</string>
